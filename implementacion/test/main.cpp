@@ -28,8 +28,8 @@ int main(void) {
   int framesToTrack = 20; // rand() % 10 + 50;
   int framesTracked = 0;
 
-  int width = 640;
-  int height = 480;
+  int width_per_level_ = 640;
+  int height_per_level_ = 480;
 
   float fx, fy, cx, cy;
   fx = 481.20;
@@ -37,20 +37,23 @@ int main(void) {
   cx = 319.5;
   cy = 239.5;
 
-  cv::Mat keyFrame =
+  cv::Mat base_frame_ =
       cv::imread(dataset_path_ "scene_000.png", cv::IMREAD_GRAYSCALE);
   Sophus::SE3f keyframePose = readPose(dataset_path_ "scene_000.txt");
 
   cv::Mat iDepth;
   cv::FileStorage fs(dataset_path_ "scene_depth_000.yml",
                      cv::FileStorage::READ);
-  fs["idepth"] >> iDepth;
+  fs["base_depth_"] >> iDepth;
 
-  // PoseEstimatorGradient poseEstimator(fx,fy,cx,cy,width,height);
-  PoseEstimatorKalman poseEstimator(fx, fy, cx, cy, width, height);
-  // PoseEstimatorParticle poseEstimator(fx,fy,cx,cy,width,height);
+  // PoseEstimatorGradient
+  // poseEstimator(fx,fy,cx,cy,width_per_level_,height_per_level_);
+  PoseEstimatorKalman poseEstimator(fx, fy, cx, cy, width_per_level_,
+                                    height_per_level_);
+  // PoseEstimatorParticle
+  // poseEstimator(fx,fy,cx,cy,width_per_level_,height_per_level_);
 
-  poseEstimator.setKeyFrame(keyFrame.clone());
+  poseEstimator.setKeyFrame(base_frame_.clone());
   poseEstimator.setIdepth(iDepth);
 
   while (1) {
@@ -80,9 +83,9 @@ int main(void) {
     std::cout << "est pose " << std::endl;
     std::cout << poseEstimator.framePose.matrix() << std::endl;
 
-    cv::imshow("image", frame);
-    cv::imshow("keyframe", keyFrame);
-    cv::imshow("idepth", iDepth);
+    cv::imshow("image (input)", frame);
+    cv::imshow("keyframe (reference)", base_frame_);
+    cv::imshow("base_depth_", iDepth);
     cv::waitKey(30);
 
     if (framesTracked >= framesToTrack) {
@@ -95,7 +98,7 @@ int main(void) {
         continue;
 
       cv::FileStorage fs(depth_filename, cv::FileStorage::READ);
-      fs["idepth"] >> iDepth;
+      fs["base_depth_"] >> iDepth;
 
       printf("frames tracked %d\n", framesTracked);
       framesTracked = 0;
@@ -105,7 +108,7 @@ int main(void) {
       poseEstimator.setIdepth(iDepth);
       poseEstimator.reset();
 
-      keyFrame = frame.clone();
+      base_frame_ = frame.clone();
       keyframePose = pose;
 
       // save depth
@@ -114,12 +117,12 @@ int main(void) {
       // keyframeNumber);
 
       // cv::FileStorage fs(depth_filename, cv::FileStorage::WRITE );
-      // fs << "idepth" << iDepth;  //choose any key here, just be consistant
-      // with the one below
+      // fs << "base_depth_" << iDepth;  //choose any key here, just be
+      // consistant with the one below
 
       // Mat fm;
       // FileStorage fs("my.yml", FileStorage::READ );
-      // fs["idepth"] >> fm;
+      // fs["base_depth_"] >> fm;
     }
   }
 

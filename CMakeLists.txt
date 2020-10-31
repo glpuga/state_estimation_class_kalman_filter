@@ -13,24 +13,24 @@ find_package(OpenCV REQUIRED )
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-include_directories("imp_c++")
+include_directories("implementacion")
 include_directories(
         ${PROJECT_SOURCE_DIR}/thirdparty/Sophus
         )
 
-file(GLOB DepthEstimator_SRCS "imp_c++/*.cpp"
-                              "imp_c++/CostVolume/*.cpp"
-                              "imp_c++/Common/*.cpp"
-                              "imp_c++/Utils/*.cpp"
+file(GLOB DepthEstimator_SRCS "implementacion/*.cpp"
+                              "implementacion/CostVolume/*.cpp"
+                              "implementacion/Common/*.cpp"
+                              "implementacion/Utils/*.cpp"
 )
 
-file(GLOB TESTAPP_SRCS "imp_c++/test/*.cpp"
-                       "imp_c++/test/utils/*.cpp")
+file(GLOB TESTAPP_SRCS "implementacion/test/*.cpp"
+                       "implementacion/test/utils/*.cpp")
 
 # build shared library.
 add_library(depthEstimator SHARED ${DepthEstimator_SRCS})
 target_link_libraries(depthEstimator ${OpenCV_LIBS})
 
 # build example app
-add_executable (testapp imp_c++/test/main.cpp ${TESTAPP_SRCS})
+add_executable (testapp implementacion/test/main.cpp ${TESTAPP_SRCS})
 target_link_libraries(testapp depthEstimator ${OpenCV_LIBS})
