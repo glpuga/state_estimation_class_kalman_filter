@@ -44,7 +44,7 @@ int main(void) {
   cv::Mat iDepth;
   cv::FileStorage fs(dataset_path_ "scene_depth_000.yml",
                      cv::FileStorage::READ);
-  fs["base_depth_"] >> iDepth;
+  fs["idepth"] >> iDepth;
 
   // PoseEstimatorGradient
   // poseEstimator(fx,fy,cx,cy,width_per_level_,height_per_level_);

@@ -3,8 +3,12 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#define TRACE()                                                                \
+  { std::cout << std::endl << __PRETTY_FUNCTION__ << std::endl << std::endl; }
+
 PoseEstimatorKalman::PoseEstimatorKalman(float fx, float fy, float cx, float cy,
                                          int width, int height) {
+  TRACE();
   for (int lvl = 0; lvl < MAX_LEVELS; lvl++) {
     float scale = std::pow(2.0f, float(lvl));
 
@@ -39,12 +43,14 @@ PoseEstimatorKalman::PoseEstimatorKalman(float fx, float fy, float cx, float cy,
 }
 
 void PoseEstimatorKalman::reset() {
+  TRACE();
   framePose = Sophus::SE3f();
   transform_innovation_ = Sophus::SE3f::log(framePose);
   sigma_ = Eigen::MatrixXf::Identity(6, 6) * pow(0.01, 2);
 }
 
 void PoseEstimatorKalman::setKeyFrame(cv::Mat keyFrame) {
+  TRACE();
   for (int lvl = 0; lvl < MAX_LEVELS; lvl++) {
     cv::resize(keyFrame, base_frame_[lvl],
                cv::Size(width_per_level_[lvl], height_per_level_[lvl]), 0, 0,
@@ -53,14 +59,17 @@ void PoseEstimatorKalman::setKeyFrame(cv::Mat keyFrame) {
 }
 
 void PoseEstimatorKalman::setIdepth(cv::Mat image_depth) {
+  TRACE();
   for (int lvl = 0; lvl < MAX_LEVELS; lvl++) {
     cv::resize(image_depth, base_depth_[lvl],
                cv::Size(width_per_level_[lvl], height_per_level_[lvl]), 0, 0,
                cv::INTER_AREA);
   }
+  TRACE();
 }
 
 Sophus::SE3f PoseEstimatorKalman::updatePose(cv::Mat frame) {
+  TRACE();
   cv::Mat level_frame[MAX_LEVELS];
   cv::Mat frameDer[MAX_LEVELS];
 
