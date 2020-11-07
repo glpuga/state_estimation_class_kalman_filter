@@ -1,51 +1,52 @@
 #pragma once
 
-#include <opencv2/core.hpp>
-
+#include <Eigen/Core>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <opencv2/core.hpp>
 
-//#include "Common/se3.h"
 #include "sophus/se3.hpp"
-#include <Eigen/Core>
-
-//#include "Utils/tictoc.h"
 
 #define MAX_LEVELS 6
 #define NUM_SAMPLES 800
 
 class PoseEstimatorKalman {
-public:
-  PoseEstimatorKalman(float fx, float fy, float cx, float cy, int width,
-                      int height);
+ public:
+  PoseEstimatorKalman(double fx, double fy, double cx, double cy, int32_t width, int32_t height);
 
-  void setKeyFrame(cv::Mat keyFrame);
-  void setIdepth(cv::Mat image_depth);
+  void setReferenceFrame(const cv::Mat &keyFrame);
 
-  Sophus::SE3f updatePose(cv::Mat frame);
+  void setReferenceDepth(const cv::Mat &image_depth);
+
+  Sophus::SE3f updateEstimator(const cv::Mat &frame);
+
   void reset();
 
-  Sophus::SE3f framePose;
+  Sophus::SE3f estimated_reference_to_current_transform_;
 
-private:
-  Eigen::Matrix3f K_[MAX_LEVELS];
-  Eigen::Matrix3f K_inverse_[MAX_LEVELS];
+ private:
+  static constexpr double initial_R_standard_dev_ = 0.01;
+  static constexpr double initial_Q_standard_dev_ = 4.0;
+
+  const Eigen::Matrix<float, 6, 6> autocov_Q_;
+  const Eigen::MatrixXf autocov_R_;
+
+  Eigen::Matrix3f camera_matrix_K_[MAX_LEVELS];
+  Eigen::Matrix3f inverse_camera_matrix_K_[MAX_LEVELS];
 
   int width_per_level_[MAX_LEVELS];
   int height_per_level_[MAX_LEVELS];
 
-  cv::Mat base_frame_[MAX_LEVELS];
-  cv::Mat base_depth_[MAX_LEVELS];
+  cv::Mat reference_frame_[MAX_LEVELS];
+  cv::Mat reference_depth_[MAX_LEVELS];
 
-  Eigen::Matrix<float, 6, 1> state_correction_;
-  Eigen::Matrix<float, 6, 6> sigma_;
+  Eigen::Matrix<float, 6, 1> state_x_;
+  Eigen::Matrix<float, 6, 6> autocov_P_;
 
-  Eigen::Matrix<float, 6, 6> R_;
-  Eigen::MatrixXf Q_;
+  cv::Mat calculateFrameDerivative(const cv::Mat &frame, const int lvl);
 
-  cv::Mat frameDerivative(cv::Mat frame, int lvl);
+  float calculateResidual(const cv::Mat &frame, const Sophus::SE3f &pose, const int lvl);
 
-  float calcResidual(cv::Mat frame, Sophus::SE3f framePose, int lvl);
-
-  void calcKalmanInc(cv::Mat frame, cv::Mat frameDer, int lvl);
+  void calculateKalmanUpdate(const cv::Mat &frame, const cv::Mat &frameDer, const int lvl);
 };

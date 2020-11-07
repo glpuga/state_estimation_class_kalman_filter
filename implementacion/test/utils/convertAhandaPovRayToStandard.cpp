@@ -1,13 +1,14 @@
 // This file converts the file format used at
 // http://www.doc.ic.ac.uk/~ahanda/HighFrameRateTracking/downloads.html into the
-// standard [R_|T] world -> camera format used by OpenCV It is based on a file
-// they provided there, but makes the world coordinate system right handed, with
-// z up, x right, and y forward.
+// standard [autocov_R_|T] world -> camera format used by OpenCV It is based on
+// a file they provided there, but makes the world coordinate system right
+// handed, with z up, x right, and y forward.
+
+#include <stdio.h>
+#include <string.h>
 
 #include <fstream>
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
 
 //#include "util/SophusUtil.h"
 #include "sophus/se3.hpp"
@@ -28,13 +29,11 @@ Sophus::SE3f readPose(const char *filename) {
   while (1) {
     cam_pars_file.getline(readlinedata, 300);
     //         cout<<readlinedata<<endl;
-    if (cam_pars_file.eof())
-      break;
+    if (cam_pars_file.eof()) break;
 
     std::istringstream iss;
 
     if (strstr(readlinedata, "cam_dir") != NULL) {
-
       std::string cam_dir_str(readlinedata);
 
       cam_dir_str = cam_dir_str.substr(cam_dir_str.find("= [") + 3);
@@ -50,7 +49,6 @@ Sophus::SE3f readPose(const char *filename) {
     }
 
     if (strstr(readlinedata, "cam_up") != NULL) {
-
       std::string cam_up_str(readlinedata);
 
       cam_up_str = cam_up_str.substr(cam_up_str.find("= [") + 3);
@@ -88,17 +86,17 @@ Sophus::SE3f readPose(const char *filename) {
     }
   }
 
-  //    R_=Mat(3,3,CV_64F);
-  //    R_.row(0)=Mat(direction.cross(upvector)).t();
-  //    R_.row(1)=Mat(-upvector).t();
-  //    R_.row(2)=Mat(direction).t();
+  //    autocov_R_=Mat(3,3,CV_64F);
+  //    autocov_R_.row(0)=Mat(direction.cross(upvector)).t();
+  //    autocov_R_.row(1)=Mat(-upvector).t();
+  //    autocov_R_.row(2)=Mat(direction).t();
 
   Eigen::Matrix3f Rot;
   Rot.row(0) = (direction.cross(upvector)).transpose();
   Rot.row(1) = (-upvector).transpose();
   Rot.row(2) = direction.transpose();
 
-  // T=-R_*Mat(posvector);
+  // T=-autocov_R_*Mat(posvector);
 
   Eigen::Vector3f Tra;
   Tra = -Rot * posvector * 0.01;

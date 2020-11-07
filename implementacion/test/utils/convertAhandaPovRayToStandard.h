@@ -6,4 +6,4 @@
 
 Sophus::SE3f readPose(const char *filename);
 
-#endif // CONVERTAHANDAPOVRAYTOSTANDARD_H_INCLUDED
+#endif  // CONVERTAHANDAPOVRAYTOSTANDARD_H_INCLUDED
