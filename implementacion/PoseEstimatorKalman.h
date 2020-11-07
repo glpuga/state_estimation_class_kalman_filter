@@ -37,7 +37,7 @@ private:
   cv::Mat base_frame_[MAX_LEVELS];
   cv::Mat base_depth_[MAX_LEVELS];
 
-  Eigen::Matrix<float, 6, 1> transform_innovation_;
+  Eigen::Matrix<float, 6, 1> state_correction_;
   Eigen::Matrix<float, 6, 6> sigma_;
 
   Eigen::Matrix<float, 6, 6> R_;

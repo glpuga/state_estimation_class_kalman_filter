@@ -98,7 +98,7 @@ int main(void) {
         continue;
 
       cv::FileStorage fs(depth_filename, cv::FileStorage::READ);
-      fs["base_depth_"] >> iDepth;
+      fs["idepth"] >> iDepth;
 
       printf("frames tracked %d\n", framesTracked);
       framesTracked = 0;

@@ -25,7 +25,7 @@ PoseEstimatorKalman::PoseEstimatorKalman(float fx, float fy, float cx, float cy,
     K_inverse_[lvl] = K_[lvl].inverse();
   }
 
-  transform_innovation_ = Sophus::SE3f::log(framePose);
+  state_correction_ = Sophus::SE3f::log(framePose);
   sigma_ = Eigen::MatrixXf::Identity(6, 6) * pow(0.01, 2);
 
   R_ = Eigen::MatrixXf::Identity(6, 6) * pow(0.01, 2);
@@ -45,7 +45,7 @@ PoseEstimatorKalman::PoseEstimatorKalman(float fx, float fy, float cx, float cy,
 void PoseEstimatorKalman::reset() {
   TRACE();
   framePose = Sophus::SE3f();
-  transform_innovation_ = Sophus::SE3f::log(framePose);
+  state_correction_ = Sophus::SE3f::log(framePose);
   sigma_ = Eigen::MatrixXf::Identity(6, 6) * pow(0.01, 2);
 }
 
@@ -84,9 +84,10 @@ Sophus::SE3f PoseEstimatorKalman::updatePose(cv::Mat frame) {
     float last_error = calcResidual(level_frame[lvl], framePose, lvl);
 
     std::cout << "lvl " << lvl << " init error " << last_error << std::endl;
+
     calcKalmanInc(level_frame[lvl], frameDer[lvl], lvl);
 
-    framePose = Sophus::SE3f::exp(transform_innovation_) * framePose;
+    framePose = Sophus::SE3f::exp(state_correction_) * framePose;
 
     float error = calcResidual(level_frame[lvl], framePose, lvl);
 
