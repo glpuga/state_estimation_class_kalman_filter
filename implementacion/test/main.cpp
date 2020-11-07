@@ -74,13 +74,14 @@ int main(void) {
     Sophus::SE3f pose = readPose(RT_filename);
     cv::Mat frame = cv::imread(image_filename, cv::IMREAD_GRAYSCALE);
 
+    // Change reference fram of the pose to the one of the keyframe
     Sophus::SE3f realPose = pose * keyframePose.inverse();
 
     poseEstimator.updatePose(frame);
 
-    std::cout << "real pose " << std::endl;
+    std::cout << "real pose (relative to keyframe)" << std::endl;
     std::cout << realPose.matrix() << std::endl;
-    std::cout << "est pose " << std::endl;
+    std::cout << "estimated pose pose (relative to keyframe)" << std::endl;
     std::cout << poseEstimator.framePose.matrix() << std::endl;
 
     cv::imshow("image (input)", frame);
@@ -104,6 +105,9 @@ int main(void) {
       framesTracked = 0;
       framesToTrack = rand() % 5 + 25; // 25;
 
+      // Updates the keyframe to always do the update relative to the latest
+      // image this is needed because the scene might change too much (this
+      // dataset does not really go that far)
       poseEstimator.setKeyFrame(frame.clone());
       poseEstimator.setIdepth(iDepth);
       poseEstimator.reset();
