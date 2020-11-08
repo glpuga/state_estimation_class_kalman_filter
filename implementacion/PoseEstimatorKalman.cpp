@@ -236,7 +236,8 @@ void PoseEstimatorKalman::calculateKalmanUpdate(const cv::Mat &observer_frame, c
   // Calculate the Kalman Gain
 
   // S[k] = linearized_matrix_G[k] * est_P[k] * inv(linearized_matrix_G[k]) +
-  // R[k] kalman_gain_K[k] = est_P[k] * (trans(linearized_matrix_G[k]) *
+  // R[k]
+  // kalman_gain_K[k] = est_P[k] * (trans(linearized_matrix_G[k]) *
   // inv(S[k]))
   //
   // This is the bottleneck of the algorithm, because we are inverting an
