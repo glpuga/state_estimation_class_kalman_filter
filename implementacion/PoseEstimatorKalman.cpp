@@ -97,7 +97,7 @@ void PoseEstimatorKalman::calculateKalmanUpdate(const cv::Mat &observer_frame, c
   // here to tranform the coordinates of the points.
   Eigen::Matrix<float, 6, 1> est_state_x = Eigen::MatrixXf::Zero(6, 1);
 
-  // est_P[k] = F[k-1] P[k-1] Ft[k-1] + Q[k]
+  // est_P[k] = F[k-1] P[k-1] trans(F[k-1]) + Q[k]
   //
   // f() is an identity function, so F = I.
   Eigen::Matrix<float, 6, 6> est_autocov_P = autocov_P_ + autocov_Q_;
